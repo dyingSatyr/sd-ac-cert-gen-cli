@@ -51,12 +51,19 @@ const generateKey = (_filename) => {
 
     if (fs.existsSync("./openssl/" + KEY_NAME)) {
       console.log(chalk.green("New key generated successfully."));
+      requestCertificate();
     } else console.log(chalk.red(`${KEY_NAME} was not generated.`));
   });
 };
 
 const requestCertificate = () => {
-  return true;
+  openssl(
+    `req -new -x509 -days 365 -key ${KEY_NAME} -out APT${facilityNumber}.${clientShortName}.crt -subj /CN=APT${facilityNumber}.${clientShortName} -sha256 -extensions v3_req`,
+    function (err, buffer) {
+      log(chalk.yellowBright(err.toString()));
+      log(chalk.green(buffer.toString()));
+    }
+  );
 };
 
 const askForFacilityInformation = () => {
