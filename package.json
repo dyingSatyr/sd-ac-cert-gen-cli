@@ -1,0 +1,23 @@
+{
+  "name": "sd-ac-cert-gen-cli",
+  "version": "1.0.0",
+  "description": "AC Certificate Generation CLI Tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dyingSatyr/sd-ac-cert-gen-cli.git"
+  },
+  "author": "Boris Grabovac",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dyingSatyr/sd-ac-cert-gen-cli/issues"
+  },
+  "homepage": "https://github.com/dyingSatyr/sd-ac-cert-gen-cli#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "figlet": "^1.5.0"
+  }
+}
