@@ -5,10 +5,14 @@ const inquirer = require("inquirer");
 const log = console.log;
 const { spawn } = require("child_process");
 const openssl = require("openssl-nodejs");
+const fs = require("fs");
 
 //User provided data
 let facilityNumber = "";
 let clientShortName = "";
+
+//Constants
+const KEY_NAME = "my.key";
 
 const runCLI = async () => {
   showWelcome();
@@ -22,15 +26,37 @@ const runCLI = async () => {
     )
   );
 
-  openssl("openssl genrsa -out ../output/my.key 2048", function (err, buffer) {
-    log(chalk.yellow(err.toString()));
-    log(chalk.green("buffah " + buffer.toString()));
-  });
+  generateKey(KEY_NAME);
 };
 
 const showWelcome = () => {
   clear();
   log(chalk.yellow(figlet.textSync("AC CertGen")));
+};
+
+const generateKey = (_filename) => {
+  if (fs.existsSync("./openssl/" + _filename)) {
+    console.log(chalk.yellow("Key file already exists."));
+    // fs.unlinkSync("./openssl/" + _filename);
+    fs.unlink("./openssl/" + _filename, (e) => {
+      e
+        ? console.log(chalk.red(e))
+        : console.log(chalk.green("Old key file deleted successfully."));
+    });
+  }
+
+  openssl(`genrsa -out ${KEY_NAME} 2048`, function (err, buffer) {
+    log(chalk.yellowBright(err.toString()));
+    log(chalk.green(buffer.toString()));
+
+    if (fs.existsSync("./openssl/" + KEY_NAME)) {
+      console.log(chalk.green("New key generated successfully."));
+    } else console.log(chalk.red(`${KEY_NAME} was not generated.`));
+  });
+};
+
+const requestCertificate = () => {
+  return true;
 };
 
 const askForFacilityInformation = () => {
