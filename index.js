@@ -3,13 +3,13 @@ const chalk = require("chalk");
 const clear = require("clear");
 const inquirer = require("inquirer");
 const log = console.log;
-const { spawn } = require("child_process");
 const openssl = require("openssl-nodejs");
 const fs = require("fs");
 
 //User provided data
 let facilityNumber = "";
 let clientShortName = "";
+let pfxPassword = "";
 
 //Constants
 const KEY_NAME = "my.key";
@@ -19,7 +19,8 @@ const runCLI = async () => {
   log(chalk.cyan("AC CertGen CLI initialized successfully."));
   const facilityInfo = await askForFacilityInformation();
   facilityNumber = facilityInfo.fnum;
-  clientShortName = facilityInfo.client;
+  clientShortName = facilityInfo.client.toUpperCase();
+  pfxPassword = facilityInfo.pw;
   log(
     chalk.cyan(
       `Generating certificates for client ${clientShortName} on F${facilityNumber}.`
@@ -36,12 +37,12 @@ const showWelcome = () => {
 
 const generateKey = (_filename) => {
   if (fs.existsSync("./openssl/" + _filename)) {
-    console.log(chalk.yellow("Key file already exists."));
+    log(chalk.yellow("Key file already exists."));
     // fs.unlinkSync("./openssl/" + _filename);
     fs.unlink("./openssl/" + _filename, (e) => {
       e
-        ? console.log(chalk.red(e))
-        : console.log(chalk.green("Old key file deleted successfully."));
+        ? log(chalk.red(e))
+        : log(chalk.green("Old key file deleted successfully."));
     });
   }
 
@@ -50,9 +51,9 @@ const generateKey = (_filename) => {
     log(chalk.green(buffer.toString()));
 
     if (fs.existsSync("./openssl/" + KEY_NAME)) {
-      console.log(chalk.green("New key generated successfully."));
+      log(chalk.green("New key generated successfully."));
       requestCertificate();
-    } else console.log(chalk.red(`${KEY_NAME} was not generated.`));
+    } else log(chalk.red(`${KEY_NAME} was not generated.`));
   });
 };
 
@@ -65,25 +66,34 @@ const requestCertificate = () => {
       if (
         fs.existsSync(`./openssl/APT${facilityNumber}.${clientShortName}.crt`)
       ) {
-        console.log(chalk.green(".crt generated successfully."));
+        log(chalk.green(".crt generated successfully."));
         exportPfx();
-      } else console.log(chalk.red(`.crt was not generated.`));
+      } else log(chalk.red(`.crt was not generated.`));
     }
   );
 };
 
 const exportPfx = () => {
   openssl(
-    `pkcs12 -export -out APT${facilityNumber}.${clientShortName}.pfx -inkey ${KEY_NAME} -in APT${facilityNumber}.${clientShortName}.crt -name "APT${facilityNumber}.${clientShortName}" -passout pass:`,
+    `pkcs12 -export -out APT${facilityNumber}.${clientShortName}.pfx -inkey ${KEY_NAME} -in APT${facilityNumber}.${clientShortName}.crt -name "APT${facilityNumber}.${clientShortName}" -passout pass:${pfxPassword}`,
     function (err, buffer) {
       log(chalk.yellowBright(err.toString()));
       log(chalk.green(buffer.toString()));
       if (
         fs.existsSync(`./openssl/APT${facilityNumber}.${clientShortName}.pfx`)
       ) {
-        console.log(chalk.green(".pfx generated successfully."));
-      } else console.log(chalk.red(`.pfx was not generated.`));
+        log(chalk.green(".pfx generated successfully."));
+        outroMessage();
+      } else log(chalk.red(`.pfx was not generated.`));
     }
+  );
+};
+
+const outroMessage = () => {
+  log(
+    chalk.cyan(
+      `Upload the generated .crt to your DAU and read it in Interfaces/Advanced Connector for client ${clientShortName}.`
+    )
   );
 };
 
@@ -112,6 +122,11 @@ const askForFacilityInformation = () => {
         }
         return true;
       },
+    },
+    {
+      name: "pw",
+      type: "input",
+      message: "Enter desired .pfx password [Optional]: ",
     },
   ];
 
