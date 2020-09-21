@@ -62,6 +62,27 @@ const requestCertificate = () => {
     function (err, buffer) {
       log(chalk.yellowBright(err.toString()));
       log(chalk.green(buffer.toString()));
+      if (
+        fs.existsSync(`./openssl/APT${facilityNumber}.${clientShortName}.crt`)
+      ) {
+        console.log(chalk.green(".crt generated successfully."));
+        exportPfx();
+      } else console.log(chalk.red(`.crt was not generated.`));
+    }
+  );
+};
+
+const exportPfx = () => {
+  openssl(
+    `pkcs12 -export -out APT${facilityNumber}.${clientShortName}.pfx -inkey ${KEY_NAME} -in APT${facilityNumber}.${clientShortName}.crt -name "APT${facilityNumber}.${clientShortName}" -passout pass:`,
+    function (err, buffer) {
+      log(chalk.yellowBright(err.toString()));
+      log(chalk.green(buffer.toString()));
+      if (
+        fs.existsSync(`./openssl/APT${facilityNumber}.${clientShortName}.pfx`)
+      ) {
+        console.log(chalk.green(".pfx generated successfully."));
+      } else console.log(chalk.red(`.pfx was not generated.`));
     }
   );
 };
