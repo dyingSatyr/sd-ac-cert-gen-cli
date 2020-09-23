@@ -19,7 +19,7 @@ const runCLI = async () => {
   log(chalk.cyan("AC CertGen CLI initialized successfully."));
   const facilityInfo = await askForFacilityInformation();
   facilityNumber = facilityInfo.fnum;
-  clientShortName = facilityInfo.client.toUpperCase();
+  clientShortName = facilityInfo.client;
   pfxPassword = facilityInfo.pw;
   log(
     chalk.cyan(
